@@ -1,5 +1,7 @@
 # Golden Age of Video Games Analysis
 
+![Video Game Analysis Visualizations](video_game_analysis_visualizations.png)
+
 ## Project Goal
 
 This project analyzes video game critic scores, user scores, and sales data for the top 400 video games released since 1977 to investigate whether a "golden age" of video games exists. The analysis aims to identify the best-selling games, the years most favored by critics and users, and periods where both critics and users highly rated games.
