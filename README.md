@@ -1,6 +1,6 @@
 # Golden Age of Video Games Analysis
 
-![Video Game Analysis Visualizations](video_game_analysis_visualizations.png)
+![Video Game Analysis Visualizations](video_game_analysis_visualization)
 
 ## Project Goal
 
