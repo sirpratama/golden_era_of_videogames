@@ -17,14 +17,14 @@ def create_datasets():
         'name': [
             'Wii Sports for Wii',
             'Super Mario Bros. for NES', 
-            'Counter-Strike: Global Offensive for PC',
+            'CSGO for PC',
             'Mario Kart Wii for Wii',
-            "PLAYERUNKNOWN'S BATTLEGROUNDS for PC",
+            "PUBG for PC",
             'Minecraft for PC',
             'Wii Sports Resort for Wii',
-            'Pokemon Red / Green / Blue Version for GB',
+            'Pokemon RGB for GB',
             'New Super Mario Bros. for DS',
-            'New Super Mario Bros. Wii for Wii'
+            'New Super Mario Bros. for Wii'
         ],
         'games_sold': [82.9, 40.24, 40, 37.32, 36.6, 33.15, 33.13, 31.38, 30.8, 30.3],
         'year': [2006, 1985, 2012, 2008, 2017, 2010, 2009, 1998, 2006, 2009],
@@ -175,25 +175,68 @@ def create_visualizations():
                 va='bottom' if height >= 0 else 'top', 
                 fontsize=9, fontweight='bold')
     
-    # 6. Sales Performance Ranked by Year
+    # 6. Sales Performance Ranked by Year - Stacked Bar Chart
     ax6 = plt.subplot(4, 2, 7)
     
-    # Group sales by year and sort by total sales in descending order
-    sales_by_year = best_selling_games.groupby('year')['games_sold'].sum().sort_values(ascending=False)
+    # Prepare data for stacked bar chart
+    sales_data = []
+    for year in best_selling_games['year'].unique():
+        year_games = best_selling_games[best_selling_games['year'] == year]
+        total_sales = year_games['games_sold'].sum()
+        sales_data.append({
+            'year': year,
+            'total_sales': total_sales,
+            'games': year_games[['name', 'games_sold']].to_dict('records')
+        })
     
-    bars = ax6.bar(sales_by_year.index.astype(str), sales_by_year.values, 
-                   color='#9b59b6', alpha=0.7, edgecolor='black', linewidth=0.5)
+    # Sort by total sales
+    sales_data = sorted(sales_data, key=lambda x: x['total_sales'], reverse=True)
+    
+    # Create stacked bars
+    years = [str(item['year']) for item in sales_data]
+    bottoms = [0] * len(sales_data)
+    
+    # Define a color palette for games
+    colors = ['#e74c3c', '#3498db', '#2ecc71', '#f39c12', '#9b59b6', '#1abc9c', '#e67e22', '#34495e']
+    
+    
+    # Create stacked bars
+    for i, year_data in enumerate(sales_data):
+        bottom = 0
+        for j, game in enumerate(year_data['games']):
+            # Simplify game name for legend
+            game_name = game['name'].split(' for ')[0]
+            sales = game['games_sold']
+            color = colors[j % len(colors)]
+            
+            # Create the bar segment
+            bar = ax6.bar(years[i], sales, bottom=bottom, 
+                         color=color, alpha=0.8, edgecolor='black', linewidth=0.5,
+                         )
+            
+            # Add game name and sales value as text on the bar segment
+            if sales > 5:  # Only show text for significant segments
+                ax6.text(bar[0].get_x() + bar[0].get_width()/2., 
+                        bottom + sales/2,
+                        f'{game_name}\n{sales:.1f}M', 
+                        ha='center', va='center', fontsize=7, fontweight='bold',
+                        color='black')
+            
+            
+            bottom += sales
     
     ax6.set_xlabel('Year', fontsize=9, fontweight='bold')
     ax6.set_ylabel('Total Sales (Millions)', fontsize=11, fontweight='bold')
-    ax6.set_title('Sales Performance Ranked by Year (Top 10 Games)', fontsize=12, fontweight='bold', pad=15)
+    ax6.set_title('Sales Performance by Year - Individual Game Breakdown', fontsize=12, fontweight='bold', pad=15)
     ax6.grid(axis='y', alpha=0.3)
     plt.setp(ax6.xaxis.get_majorticklabels(), rotation=0, fontsize=9)
     
-    # Add value labels on bars
-    for bar, sales in zip(bars, sales_by_year.values):
-        ax6.text(bar.get_x() + bar.get_width()/2., bar.get_height() + 1,
-                f'{sales:.1f}M', ha='center', va='bottom', fontsize=8, fontweight='bold')
+    # Add total value labels on top of each stacked bar
+    for i, year_data in enumerate(sales_data):
+        total = year_data['total_sales']
+        ax6.text(i, total + 2, f'{total:.1f}M', 
+                ha='center', va='bottom', fontsize=9, fontweight='bold')
+    
     
     # 7. Timeline Analysis - Golden Years vs Sales
     ax7 = plt.subplot(4, 2, 8)
